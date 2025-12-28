@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виртуальная примерочная</title>
+    <style>
+        :root {
+            --primary: #7C3AED;
+            --primary-dark: #5B21B6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gray: #6B7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Шапка */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+
+        /* Основной контент */
+        main {
+            padding: 40px 0;
+        }
+
+        /* Блок загрузки */
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 40px;
+        }
+
+        /* Двойная загрузка */
+        .double-upload {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .double-upload {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-card {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px dashed var(--primary);
+            transition: all 0.3s;
+            cursor: pointer;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary-dark);
+            background: rgba(124, 58, 237, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .upload-card i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .upload-card h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .upload-card p {
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .btn-upload {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upload:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Превью */
+        .preview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .preview-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preview-box {
+            text-align: center;
+        }
+
+        .preview-title {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin: 0 auto;
+        }
+
+        .remove-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .remove-btn:hover {
+            background: #D97706;
+        }
+
+        /* Контролы */
+        .controls {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .process-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .process-btn:hover:not(:disabled) {
+            background: #D97706;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(245, 158, 11, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Блок обработки */
+        .processing-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin: 30px 0;
+            display: none;
+            text-align: center;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #E5E7EB;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            margin: 30px auto;
+            overflow: hidden;
+            max-width: 400px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Результаты */
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .result-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-card {
+            text-align: center;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .download-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background: #0EA271;
+            transform: translateY(-2px);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+
+        .notification.success {
+            border-left: 5px solid var(--secondary);
+        }
+
+        .notification.error {
+            border-left: 5px solid #EF4444;
+        }
+
+        .notification i {
+            font-size: 24px;
+        }
+
+        .notification.success i {
+            color: var(--secondary);
+        }
+
+        .notification.error i {
+            color: #EF4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Инструкция */
+        .instructions {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+        .instructions h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: var(--gray);
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: var(--dark);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .upload-card {
+                padding: 20px;
+            }
+            
+            .process-btn {
+                padding: 14px 30px;
+                font-size: 16px;
+            }
+        }
+
+        /* Подсказки по перетаскиванию */
+        .drag-hint {
+            font-size: 14px;
+            color: var(--gray);
+            margin-top: 10px;
+        }
+
+        /* Плейсхолдеры */
+        .placeholder {
+            width: 100%;
+            height: 200px;
+            background: var(--light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 14px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-tshirt"></i>
+                    Виртуальная примерочная
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <section class="upload-section">
+            <h1>Виртуальная примерочная</h1>
+            <p class="subtitle">Загрузите свое фото в полный рост и фото одежды с любого сайта для примерки</p>
+            
+            <!-- Блок двойной загрузки -->
+            <div class="double-upload">
+                <!-- Загрузка фото человека -->
+                <div class="upload-card" id="personUpload">
+                    <i class="fas fa-user"></i>
+                    <h3>Фото человека в полный рост</h3>
+                    <p>Загрузите ваше фото в полный рост</p>
+                    <button class="btn-upload" onclick="document.getElementById('personInput').click()">
+                        <i class="fas fa-upload"></i> Загрузить фото
+                    </button>
+                    <p class="drag-hint">или перетащите сюда</p>
+                    <input type="file" id="personInput" accept="image/*" class="upload-input">
+                </div>
+                
+                <!-- Загрузка фото одежды -->
+                <div class="upload-card" id="clothingUpload">
+                    <i class="fas fa-tshirt"></i>
+                    <h3>Фото одежды с сайта</h3>
+                    <p>Загрузите фото одежды с любого сайта</p>
+                    <button class="btn-upload" onclick="document.getElementById('clothingInput').click()">
+                        <i class="fas fa-upload"></i> Загрузить одежду
+                    </button>
+                    <p class="drag-hint">или перетащите сюда</p>
+                    <input type="file" id="clothingInput" accept="image/*" class="upload-input">
+                </div>
+            </div>
+            
+            <!-- Превью загруженных фото -->
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3 class="preview-title">
+                        <i class="fas fa-user-check"></i> Ваше фото
+                    </h3>
+                    <div class="placeholder" id="personPlaceholder">
+                        Фото не загружено
+                    </div>
+                    <img id="personPreview" class="preview-image" alt="Ваше фото">
+                    <button class="remove-btn" onclick="removePersonPhoto()" style="display: none;">
+                        <i class="fas fa-times"></i> Удалить
+                    </button>
+                </div>
+                
+                <div class="preview-box">
+                    <h3 class="preview-title">
+                        <i class="fas fa-tshirt"></i> Фото одежды
+                    </h3>
+                    <div class="placeholder" id="clothingPlaceholder">
+                        Фото одежды не загружено
+                    </div>
+                    <img id="clothingPreview" class="preview-image" alt="Фото одежды">
+                    <button class="remove-btn" onclick="removeClothingPhoto()" style="display: none;">
+                        <i class="fas fa-times"></i> Удалить
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Контролы -->
+            <div class="controls">
+                <button class="process-btn" id="processBtn" disabled onclick="startProcessing()">
+                    <i class="fas fa-robot"></i> Начать примерку
+                </button>
+            </div>
+        </section>
+        
+        <!-- Блок обработки -->
+        <section class="processing-section" id="processingSection">
+            <div class="loader"></div>
+            <h2 style="margin-bottom: 10px; color: var(--dark);">
+                <i class="fas fa-cogs"></i> Идет обработка
+            </h2>
+            <p style="color: var(--gray); margin-bottom: 20px;">
+                ИИ анализирует фото и накладывает одежду на ваше изображение
+            </p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div id="processSteps" style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i>
+                    <span>Фото загружены</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; opacity: 0.5;">
+                    <i class="fas fa-user"></i>
+                    <span>Определение позы человека</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; opacity: 0.5;">
+                    <i class="fas fa-crop"></i>
+                    <span>Выделение одежды на фото</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; opacity: 0.5;">
+                    <i class="fas fa-magic"></i>
+                    <span>Наложение одежды на человека</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; opacity: 0.5;">
+                    <i class="fas fa-adjust"></i>
+                    <span>Коррекция освещения и теней</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; opacity: 0.5;">
+                    <i class="fas fa-check-double"></i>
+                    <span>Финальная обработка</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Результаты -->
+        <section class="results-section" id="resultsSection">
+            <div class="result-header">
+                <h2 style="margin-bottom: 10px; color: var(--dark);">
+                    <i class="fas fa-check-circle" style="color: var(--secondary);"></i> Результаты примерки
+                </h2>
+                <p style="color: var(--gray);">ИИ успешно наложил одежду на ваше фото</p>
+            </div>
+            
+            <div class="result-comparison">
+                <div class="result-card">
+                    <img id="resultOriginal" class="result-image" alt="Исходное фото">
+                    <div class="result-label">Исходное фото</div>
+                </div>
+                
+                <div class="result-card">
+                    <img id="resultClothing" class="result-image" alt="Фото одежды">
+                    <div class="result-label">Выбранная одежда</div>
+                </div>
+                
+                <div class="result-card">
+                    <img id="resultFitting" class="result-image" alt="Результат примерки">
+                    <div class="result-label">Результат примерки</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="download-btn" onclick="downloadResult()">
+                    <i class="fas fa-download"></i> Скачать результат
+                </button>
+                
+                <div class="action-buttons">
+                    <button class="btn-upload" onclick="shareResult()">
+                        <i class="fas fa-share-alt"></i> Поделиться
+                    </button>
+                    <button class="btn-upload" onclick="startNewFitting()">
+                        <i class="fas fa-redo"></i> Новая примерка
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Инструкция -->
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Как пользоваться виртуальной примерочной?</h3>
+            <ol>
+                <li><strong>Загрузите фото в полный рост</strong> — ваше фото в полный рост на однотонном фоне для лучшего результата</li>
+                <li><strong>Загрузите фото одежды</strong> — найдите понравившуюся одежду на любом сайте, скопируйте фото или сделайте скриншот</li>
+                <li><strong>Запустите обработку</strong> — нажмите "Начать примерку"</li>
+                <li><strong>Получите результат</strong> — ИИ наложит выбранную одежду на ваше фото</li>
+                <li><strong>Скачайте или поделитесь</strong> — сохраните результат или поделитесь с друзьями</li>
+            </ol>
+            <p style="margin-top: 15px; font-size: 14px; color: var(--gray);">
+                <i class="fas fa-lightbulb"></i> Совет: Для лучшего результата используйте фото в хорошем качестве на однотонном фоне
+            </p>
+        </div>
+    </main>
+
+    <!-- Уведомления -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <div id="notificationTitle"></div>
+            <div id="notificationMessage" style="font-size: 14px; color: var(--gray);"></div>
+        </div>
+        <button onclick="hideNotification()" style="background: none; border: none; color: var(--gray); cursor: pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        // Состояние приложения
+        let state = {
+            personPhoto: null,
+            clothingPhoto: null,
+            resultPhoto: null,
+            isProcessing: false
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUploads();
+            setupDragAndDrop();
+        });
+
+        // Настройка загрузки файлов
+        function setupFileUploads() {
+            const personInput = document.getElementById('personInput');
+            const clothingInput = document.getElementById('clothingInput');
+            
+            personInput.addEventListener('change', (e) => {
+                if(e.target.files.length) {
+                    handleFileSelect(e.target.files[0], 'person');
+                }
+            });
+            
+            clothingInput.addEventListener('change', (e) => {
+                if(e.target.files.length) {
+                    handleFileSelect(e.target.files[0], 'clothing');
+                }
+            });
+        }
+
+        // Настройка Drag & Drop
+        function setupDragAndDrop() {
+            const personUpload = document.getElementById('personUpload');
+            const clothingUpload = document.getElementById('clothingUpload');
+            
+            // Для фото человека
+            ['dragenter', 'dragover'].forEach(event => {
+                personUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    personUpload.style.borderColor = 'var(--primary-dark)';
+                    personUpload.style.background = 'rgba(124, 58, 237, 0.1)';
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(event => {
+                personUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    personUpload.style.borderColor = 'var(--primary)';
+                    personUpload.style.background = '';
+                });
+            });
+            
+            personUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if(e.dataTransfer.files.length) {
+                    handleFileSelect(e.dataTransfer.files[0], 'person');
+                }
+            });
+            
+            // Для фото одежды
+            ['dragenter', 'dragover'].forEach(event => {
+                clothingUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    clothingUpload.style.borderColor = 'var(--primary-dark)';
+                    clothingUpload.style.background = 'rgba(124, 58, 237, 0.1)';
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(event => {
+                clothingUpload.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    clothingUpload.style.borderColor = 'var(--primary)';
+                    clothingUpload.style.background = '';
+                });
+            });
+            
+            clothingUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if(e.dataTransfer.files.length) {
+                    handleFileSelect(e.dataTransfer.files[0], 'clothing');
+                }
+            });
+        }
