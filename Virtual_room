@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виртуальная примерочная</title>
+    <style>
+        :root {
+            --primary: #7C3AED;
+            --primary-dark: #5B21B6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gray: #6B7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo i { font-size: 28px; }
+
+        main { padding: 40px 0; }
+
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        h1 { text-align: center; margin-bottom: 10px; color: var(--dark); }
+        .subtitle { text-align: center; color: var(--gray); margin-bottom: 40px; }
+
+        .double-upload {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) { .double-upload { grid-template-columns: 1fr; } }
+
+        .upload-card {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px dashed var(--primary);
+            transition: all 0.3s;
+            cursor: pointer;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary-dark);
+            background: rgba(124, 58, 237, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .upload-card i { font-size: 48px; color: var(--primary); margin-bottom: 20px; }
+        .upload-card h3 { margin-bottom: 10px; color: var(--dark); }
+        .upload-card p { color: var(--gray); margin-bottom: 20px; font-size: 14px; }
+        .upload-input { display: none; }
+
+        .btn-upload {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-upload:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) { .preview-container { grid-template-columns: 1fr; } }
+
+        .preview-box { text-align: center; }
+        .preview-title {
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin: 0 auto;
+        }
+
+        .remove-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls { text-align: center; margin: 40px 0; }
+
+        .process-btn {
+            background: linear-gradient(135deg, var(--accent), #D97706);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(245, 158, 11, 0.3);
+        }
+
+        .process-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+        }
+
+        .processing-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin: 30px 0;
+            display: none;
+            text-align: center;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #E5E7EB;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            margin: 30px auto;
+            overflow: hidden;
+            max-width: 400px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-text {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-header { text-align: center; margin-bottom: 30px; }
+        .result-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) { .result-comparison { grid-template-columns: 1fr; } }
+
+        .result-card { text-align: center; }
+        .result-image {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .result-label { font-weight: 600; color: var(--dark); margin-top: 10px; }
+
+        .download-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover { background: #0EA271; transform: translateY(-2px); }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #166534;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            border-left: 4px solid var(--secondary);
+            flex-wrap: wrap;
+        }
+
+        .detection-result {
+            background: #e0e7ff;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #3730a3;
+        }
+
+        .adjust-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .adjust-panel h4 {
+            margin-bottom: 15px;
+            color: var(--dark);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .slider-group {
+            margin-bottom: 20px;
+        }
+        
+        .slider-group label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--dark);
+        }
+        
+        .slider-group input {
+            flex: 1;
+            min-width: 200px;
+            cursor: pointer;
+        }
+        
+        .slider-group span {
+            font-weight: bold;
+            color: var(--primary);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success { border-left: 5px solid var(--secondary); }
+        .notification.error { border-left: 5px solid #EF4444; }
+        .notification i { font-size: 20px; }
+        .notification.success i { color: var(--secondary); }
+        .notification.error i { color: #EF4444; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .placeholder {
+            width: 100%;
+            max-width: 350px;
+            height: 200px;
+            background: var(--light);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 14px;
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        .drag-hint { font-size: 12px; color: var(--gray); margin-top: 8px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-tshirt"></i>
+                    Виртуальная примерочная
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="upload-section" id="uploadSection">
+            <h1>Виртуальная примерочная</h1>
+            <p class="subtitle">Загрузите фото в полный рост и фото одежды</p>
+            
+            <div class="double-upload">
+                <div class="upload-card" id="personUpload">
+                    <i class="fas fa-user"></i>
+                    <h3>Фото человека</h3>
+                    <p>Загрузите фото в полный рост</p>
+                    <button class="btn-upload" onclick="document.getElementById('personInput').click()">
+                        <i class="fas fa-upload"></i> Выбрать фото
+                    </button>
+                    <p class="drag-hint">или перетащите сюда</p>
+                    <input type="file" id="personInput" accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                </div>
+                
+                <div class="upload-card" id="clothingUpload">
+                    <i class="fas fa-tshirt"></i>
+                    <h3>Фото одежды</h3>
+                    <p>Футболка, толстовка, джинсы, шорты...</p>
+                    <button class="btn-upload" onclick="document.getElementById('clothingInput').click()">
+                        <i class="fas fa-upload"></i> Выбрать фото
+                    </button>
+                    <p class="drag-hint">или перетащите сюда</p>
+                    <input type="file" id="clothingInput" accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                </div>
+            </div>
+            
+            <div class="preview-container">
+                <div class="preview-box">
+                    <h3 class="preview-title"><i class="fas fa-user-check"></i> Ваше фото</h3>
+                    <div class="placeholder" id="personPlaceholder">
+                        <i class="fas fa-image" style="font-size: 32px; opacity: 0.5;"></i>
+                        <p>Фото не загружено</p>
+                    </div>
+                    <img id="personPreview" class="preview-image" alt="Ваше фото">
+                    <button class="remove-btn" onclick="removePhoto('person')" style="display: none;">
+                        <i class="fas fa-times"></i> Удалить
+                    </button>
+                </div>
+                
+                <div class="preview-box">
+                    <h3 class="preview-title"><i class="fas fa-tshirt"></i> Фото одежды</h3>
+                    <div class="placeholder" id="clothingPlaceholder">
+                        <i class="fas fa-image" style="font-size: 32px; opacity: 0.5;"></i>
+                        <p>Фото не загружено</p>
+                    </div>
+                    <img id="clothingPreview" class="preview-image" alt="Фото одежды">
+                    <button class="remove-btn" onclick="removePhoto('clothing')" style="display: none;">
+                        <i class="fas fa-times"></i> Удалить
+                    </button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="process-btn" id="processBtn" disabled onclick="startFitting()">
+                    <i class="fas fa-magic"></i> Примерить одежду
+                </button>
+            </div>
+            
+            <div class="info-box">
+                <i class="fas fa-magic"></i>
+                <strong>Как работает:</strong><br>
+                🔍 Анализирует пропорции одежды → определяет тип (верх/низ)<br>
+                ✂️ Удаляет фон с одежды<br>
+                📍 Накладывает на нужную часть тела
+            </div>
+        </section>
+        
+        <div class="processing-section" id="processingSection">
+            <div class="loader"></div>
+            <h2>Обработка изображений</h2>
+            <p id="processingText">Подготовка...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText">
+                <i class="fas fa-spinner fa-spin"></i> Анализ одежды...
+            </div>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <div class="result-header">
+                <h2><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Результат примерки</h2>
+                <p>Настройте точное положение одежды</p>
+            </div>
+            
+            <div class="result-comparison">
+                <div class="result-card">
+                    <img id="resultOriginal" class="result-image" alt="Исходное фото">
+                    <div class="result-label">Исходное фото</div>
+                </div>
+                <div class="result-card">
+                    <img id="resultClothing" class="result-image" alt="Одежда">
+                    <div class="result-label">Одежда (фон удалён)</div>
+                </div>
+                <div class="result-card">
+                    <img id="resultFitting" class="result-image" alt="Результат">
+                    <div class="result-label">Результат примерки</div>
+                </div>
+            </div>
+            
+            <div id="detectionInfo" class="detection-result"></div>
+            
+            <div class="adjust-panel">
+                <h4><i class="fas fa-sliders-h"></i> Настройка одежды</h4>
+                
+                <div class="slider-group">
+                    <label>
+                        <i class="fas fa-expand-alt"></i> Размер (ширина)
+                        <input type="range" id="sizeSlider" min="30" max="400" value="115" step="5">
+                        <span id="sizeValue">115</span>%
+                    </label>
+                </div>
+                
+                <div class="slider-group">
+                    <label>
+                        <i class="fas fa-arrows-alt-v"></i> Высота
+                        <input type="range" id="heightSlider" min="30" max="400" value="100" step="5">
+                        <span id="heightValue">100</span>%
+                    </label>
+                </div>
+                
+                <div class="slider-group">
+                    <label>
+                        <i class="fas fa-arrow-up"></i> Смещение вверх/вниз
+                        <input type="range" id="offsetSlider" min="-60" max="60" value="0" step="2">
+                        <span id="offsetValue">0</span>%
+                    </label>
+                </div>
+                
+                <div class="slider-group">
+                    <label>
+                        <i class="fas fa-arrow-left"></i> Смещение влево/вправо
+                        <input type="range" id="horizontalSlider" min="-60" max="60" value="0" step="2">
+                        <span id="horizontalValue">0</span>%
+                    </label>
+                </div>
+                
+                <div class="slider-group">
+                    <label>
+                        <i class="fas fa-sync-alt"></i> Поворот (градусы)
+                        <input type="range" id="rotateSlider" min="-45" max="45" value="0" step="1">
+                        <span id="rotateValue">0</span>°
+                    </label>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="download-btn" onclick="downloadResult()">
+                    <i class="fas fa-download"></i> Скачать результат
+                </button>
+                <div class="action-buttons">
+                    <button class="btn-upload" onclick="newFitting()">
+                        <i class="fas fa-redo"></i> Новая примерка
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <div>
+            <div id="notificationTitle"></div>
+            <div id="notificationMessage" style="font-size: 13px;"></div>
+        </div>
+        <button onclick="closeNotification()" style="background: none; border: none; cursor: pointer;">×</button>
+    </div>
+
+    <script>
+        // Состояние приложения
+        let appState = {
+            personImage: null,
+            clothingImage: null,
+            clothingNoBg: null,
+            resultImage: null,
+            bodyMeasurements: null,
+            clothingType: 'upper',
+            clothingTypeName: '',
+            currentSizePercent: 115,
+            currentHeightPercent: 100,
+            currentOffsetPercent: 0,
+            currentHorizontalPercent: 0,
+            currentRotateDeg: 0
+        };
+
+        // Элементы DOM
+        const personInput = document.getElementById('personInput');
+        const clothingInput = document.getElementById('clothingInput');
+        const processBtn = document.getElementById('processBtn');
+
+        // Ползунки
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        const heightSlider = document.getElementById('heightSlider');
+        const heightValue = document.getElementById('heightValue');
+        const offsetSlider = document.getElementById('offsetSlider');
+        const offsetValue = document.getElementById('offsetValue');
+        const horizontalSlider = document.getElementById('horizontalSlider');
+        const horizontalValue = document.getElementById('horizontalValue');
+        const rotateSlider = document.getElementById('rotateSlider');
+        const rotateValue = document.getElementById('rotateValue');
+
+        // Обработчики загрузки
+        personInput.addEventListener('change', (e) => handleImageUpload(e, 'person'));
+        clothingInput.addEventListener('change', (e) => handleImageUpload(e, 'clothing'));
+
+        function setupDragDrop() {
+            const personArea = document.getElementById('personUpload');
+            const clothingArea = document.getElementById('clothingUpload');
+
+            [personArea, clothingArea].forEach(area => {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = '#D97706';
+                    area.style.background = 'rgba(124, 58, 237, 0.1)';
+                });
+                
+                area.addEventListener('dragleave', () => {
+                    area.style.borderColor = '#7C3AED';
+                    area.style.background = '';
+                });
+                
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.style.borderColor = '#7C3AED';
+                    area.style.background = '';
+                    const file = e.dataTransfer.files[0];
+                    if(file && file.type.match('image.*')) {
+                        const type = area.id === 'personUpload' ? 'person' : 'clothing';
+                        loadImage(file, type);
+                    }
+                });
+            });
+        }
+
+        setupDragDrop();
+
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if(file && file.type.match('image.*')) {
+                loadImage(file, type);
+            }
+        }
+
+        function loadImage(file, type) {
+            if(file.size > 10 * 1024 * 1024) {
+                showNotification('Ошибка', 'Файл слишком большой (макс. 10MB)', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if(type === 'person') {
+                    appState.personImage = e.target.result;
+                    showPreview('person', e.target.result);
+                } else {
+                    appState.clothingImage = e.target.result;
+                    showPreview('clothing', e.target.result);
+                }
+                checkBothImages();
+                showNotification('Успешно', 'Фото загружено', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showPreview(type, dataUrl) {
+            const preview = document.getElementById(`${type}Preview`);
+            const placeholder = document.getElementById(`${type}Placeholder`);
+            const removeBtn = document.querySelector(`.preview-box:nth-child(${type === 'person' ? 1 : 2}) .remove-btn`);
+            
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+            removeBtn.style.display = 'inline-flex';
+        }
+
+        function removePhoto(type) {
+            if(type === 'person') {
+                appState.personImage = null;
+                appState.bodyMeasurements = null;
+                document.getElementById('personPreview').style.display = 'none';
+                document.getElementById('personPlaceholder').style.display = 'flex';
+                personInput.value = '';
+            } else {
+                appState.clothingImage = null;
+                appState.clothingNoBg = null;
+                document.getElementById('clothingPreview').style.display = 'none';
+                document.getElementById('clothingPlaceholder').style.display = 'flex';
+                clothingInput.value = '';
+            }
+            const removeBtn = document.querySelector(`.preview-box:nth-child(${type === 'person' ? 1 : 2}) .remove-btn`);
+            removeBtn.style.display = 'none';
+            checkBothImages();
+        }
+
+        function checkBothImages() {
+            processBtn.disabled = !(appState.personImage && appState.clothingImage);
+        }
+
+        function showNotification(title, message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.className = `notification ${type}`;
+            document.getElementById('notificationTitle').textContent = title;
+            document.getElementById('notificationMessage').textContent = message;
+            notification.style.display = 'flex';
+            setTimeout(() => notification.style.display = 'none', 3000);
+        }
+
+        function closeNotification() {
+            document.getElementById('notification').style.display = 'none';
+        }
+
+        function detectClothingType(imgElement) {
+            const aspectRatio = imgElement.width / imgElement.height;
+            if(aspectRatio > 0.7) {
+                return { type: 'upper', name: 'верхняя одежда (футболка/толстовка)' };
+            } else {
+                return { type: 'lower', name: 'нижняя одежда (джинсы/шорты)' };
+            }
+        }
+
+        function analyzeBodyShape(imgElement) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = imgElement.width;
+                canvas.height = imgElement.height;
+                ctx.drawImage(imgElement, 0, 0);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                const brightness = [];
+                for(let i = 0; i < data.length; i += 4) {
+                    brightness.push((data[i] + data[i+1] + data[i+2]) / 3);
+                }
+                
+                let leftBody = canvas.width * 0.3;
+                let rightBody = canvas.width * 0.7;
+                let topBody = canvas.height * 0.22;
+                let bottomBody = canvas.height * 0.68;
+                
+                for(let x = Math.floor(canvas.width * 0.25); x < Math.floor(canvas.width * 0.5); x++) {
+                    let sumBrightness = 0;
+                    for(let y = Math.floor(canvas.height * 0.3); y < Math.floor(canvas.height * 0.6); y++) {
+                        sumBrightness += brightness[y * canvas.width + x];
+                    }
+                    const avgBrightness = sumBrightness / (canvas.height * 0.3);
+                    
+                    if(x > Math.floor(canvas.width * 0.25)) {
+                        let prevSum = 0;
+                        for(let y = Math.floor(canvas.height * 0.3); y < Math.floor(canvas.height * 0.6); y++) {
+                            prevSum += brightness[y * canvas.width + (x-1)];
+                        }
+                        const prevAvg = prevSum / (canvas.height * 0.3);
+                        if(Math.abs(avgBrightness - prevAvg) > 20 && avgBrightness < 150) {
+                            leftBody = x;
+                            break;
+                        }
+                    }
+                }
+                
+                for(let x = Math.floor(canvas.width * 0.75); x > Math.floor(canvas.width * 0.5); x--) {
+                    let sumBrightness = 0;
+                    for(let y = Math.floor(canvas.height * 0.3); y < Math.floor(canvas.height * 0.6); y++) {
+                        sumBrightness += brightness[y * canvas.width + x];
+                    }
+                    const avgBrightness = sumBrightness / (canvas.height * 0.3);
+                    
+                    if(x < Math.floor(canvas.width * 0.75)) {
+                        let nextSum = 0;
+                        for(let y = Math.floor(canvas.height * 0.3); y < Math.floor(canvas.height * 0.6); y++) {
+                            nextSum += brightness[y * canvas.width + (x+1)];
+                        }
+                        const nextAvg = nextSum / (canvas.height * 0.3);
+                        if(Math.abs(avgBrightness - nextAvg) > 20 && avgBrightness < 150) {
+                            rightBody = x;
+                            break;
+                        }
+                    }
+                }
+                
+                const bodyWidth = rightBody - leftBody;
+                const centerX = (leftBody + rightBody) / 2;
+                
+                resolve({
+                    leftEdge: leftBody,
+                    rightEdge: rightBody,
+                    topEdge: topBody,
+                    bottomEdge: bottomBody,
+                    bodyWidth: bodyWidth,
+                    bodyHeight: bottomBody - topBody,
+                    centerX: centerX
+                });
+            });
+        }
+
+        function removeBackground(imgElement) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = imgElement.width;
+                canvas.height = imgElement.height;
+                ctx.drawImage(imgElement, 0, 0);
+                
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                const corners = [
+                    [0, 0], [canvas.width-1, 0],
+                    [0, canvas.height-1], [canvas.width-1, canvas.height-1]
+                ];
+                
+                let bgR = 0, bgG = 0, bgB = 0;
+                corners.forEach(([x, y]) => {
+                    const idx = (y * canvas.width + x) * 4;
+                    bgR += data[idx];
+                    bgG += data[idx+1];
+                    bgB += data[idx+2];
+                });
+                bgR /= 4;
+                bgG /= 4;
+                bgB /= 4;
+                
+                let sumDiff = 0;
+                let sampleCount = 0;
+                for(let y = 0; y < canvas.height; y += 10) {
+                    for(let x = 0; x < canvas.width; x += 10) {
+                        if(y < 15 || y > canvas.height-15 || x < 15 || x > canvas.width-15) {
+                            const idx = (y * canvas.width + x) * 4;
+                            const diff = Math.abs(data[idx] - bgR) + Math.abs(data[idx+1] - bgG) + Math.abs(data[idx+2] - bgB);
+                            sumDiff += diff;
+                            sampleCount++;
+                        }
+                    }
+                }
+                const avgDiff = sumDiff / sampleCount;
+                const threshold = Math.max(avgDiff * 1.2, 35);
+                
+                for(let i = 0; i < data.length; i += 4) {
+                    const diff = Math.abs(data[i] - bgR) + Math.abs(data[i+1] - bgG) + Math.abs(data[i+2] - bgB);
+                    if(diff < threshold) {
+                        data[i+3] = 0;
+                    }
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                
+                let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+                const resultData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                
+                for(let y = 0; y < canvas.height; y++) {
+                    for(let x = 0; x < canvas.width; x++) {
+                        if(resultData[(y * canvas.width + x) * 4 + 3] > 20) {
+                            minX = Math.min(minX, x);
+                            maxX = Math.max(maxX, x);
+                            minY = Math.min(minY, y);
+                            maxY = Math.max(maxY, y);
+                        }
+                    }
+                }
+                
+                const padding = 10;
+                const cropX = Math.max(0, minX - padding);
+                const cropY = Math.max(0, minY - padding);
+                const cropW = Math.min(canvas.width - cropX, (maxX - minX) + padding * 2);
+                const cropH = Math.min(canvas.height - cropY, (maxY - minY) + padding * 2);
+                
+                const croppedCanvas = document.createElement('canvas');
+                croppedCanvas.width = cropW;
+                croppedCanvas.height = cropH;
+                const croppedCtx = croppedCanvas.getContext('2d');
+                croppedCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+                
+                resolve(croppedCanvas);
+            });
+        }
+
+        async function overlayClothing(personImg, clothingCanvas, bodyMeasurements, clothingType, sizePercent, heightPercent, offsetPercent, horizontalPercent, rotateDeg) {
+            const canvas = document.createElement('canvas');
+            canvas.width = personImg.width;
+            canvas.height = personImg.height;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.drawImage(personImg, 0, 0);
+            
+            let targetY, targetHeight;
+            
+            if(clothingType === 'upper') {
+                targetY = bodyMeasurements.topEdge;
+                targetHeight = bodyMeasurements.bodyHeight * 0.85;
+            } else {
+                targetY = bodyMeasurements.topEdge + bodyMeasurements.bodyHeight * 0.55;
+                targetHeight = bodyMeasurements.bodyHeight * 0.6;
+            }
+            
+            const baseWidth = bodyMeasurements.bodyWidth;
+            const adjustedWidth = baseWidth * (sizePercent / 100);
+            
+            const clothingAspect = clothingCanvas.width / clothingCanvas.height;
+            let clothingWidth = adjustedWidth;
+            let clothingHeight = (clothingWidth / clothingAspect) * (heightPercent / 100);
+            
+            if(clothingHeight > targetHeight * 1.5) {
+                clothingHeight = targetHeight * 1.5;
+                clothingWidth = clothingHeight * clothingAspect;
+            }
+            
+            const baseX = bodyMeasurements.centerX - (clothingWidth / 2);
+            const horizontalPixels = (bodyMeasurements.bodyWidth * horizontalPercent) / 100;
+            const clothingX = baseX + horizontalPixels;
+            
+            const offsetPixels = (targetHeight * offsetPercent) / 100;
+            const clothingY = targetY + (targetHeight - clothingHeight) / 2 + offsetPixels;
+            
+            ctx.save();
+            ctx.translate(clothingX + clothingWidth / 2, clothingY + clothingHeight / 2);
+            ctx.rotate(rotateDeg * Math.PI / 180);
+            ctx.drawImage(clothingCanvas, -clothingWidth / 2, -clothingHeight / 2, clothingWidth, clothingHeight);
+            ctx.restore();
+            
+            ctx.font = 'bold 10px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('Виртуальная примерочная', 10, canvas.height - 8);
+            
+            return canvas;
+        }
+
+        async function startFitting() {
+            if(!appState.personImage || !appState.clothingImage) {
+                showNotification('Ошибка', 'Загрузите оба фото', 'error');
+                return;
+            }
+            
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('processingSection').style.display = 'block';
+            
+            const progressFill = document.getElementById('progressFill');
+            const processingText = document.getElementById('processingText');
+            const statusText = document.getElementById('statusText');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 3;
+                progressFill.style.width = Math.min(progress, 100) + '%';
+                if(progress >= 100) clearInterval(interval);
+            }, 200);
+            
+            try {
+                processingText.textContent = 'Загрузка изображений...';
+                statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
+                await delay(300);
+                
+                const personImg = await loadImageFromUrl(appState.personImage);
+                const clothingImg = await loadImageFromUrl(appState.clothingImage);
+                
+                processingText.textContent = 'Определение типа одежды...';
+                statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Анализ пропорций...';
+                await delay(500);
+                
+                const detection = detectClothingType(clothingImg);
+                appState.clothingType = detection.type;
+                appState.clothingTypeName = detection.name;
+                
+                processingText.textContent = 'Удаление фона с одежды...';
+                statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка изображения...';
+                await delay(500);
+                
+                const clothingNoBg = await removeBackground(clothingImg);
+                appState.clothingNoBg = clothingNoBg;
+                
+                processingText.textContent = 'Анализ фигуры человека...';
+                statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Поиск плеч и талии...';
+                await delay(500);
+                
+                const bodyMeasurements = await analyzeBodyShape(personImg);
+                appState.bodyMeasurements = bodyMeasurements;
+                
+                processingText.textContent = 'Наложение одежды...';
+                statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Применение настроек...';
+                await delay(500);
+                
+                const resultCanvas = await overlayClothing(
+                    personImg, clothingNoBg, bodyMeasurements,
+                    appState.clothingType,
+                    appState.currentSizePercent,
+                    appState.currentHeightPercent,
+                    appState.currentOffsetPercent,
+                    appState.currentHorizontalPercent,
+                    appState.currentRotateDeg
+                );
+                
+                appState.resultImage = resultCanvas.toDataURL('image/png');
+                
+                progressFill.style.width = '100%';
+                processingText.textContent = 'Готово!';
+                statusText.innerHTML = '<i class="fas fa-check-circle" style="color: #10B981;"></i> Обработка завершена!';
+                
+                await delay(500);
+                showResults();
+                
+            } catch(error) {
+                console.error(error);
+                showNotification('Ошибка', 'Не удалось обработать изображение', 'error');
+                newFitting();
+            }
+        }
+        
+        function loadImageFromUrl(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+        
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        async function showResults() {
+            document.getElementById('processingSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            document.getElementById('resultOriginal').src = appState.personImage;
+            
+            if(appState.clothingNoBg) {
+                document.getElementById('resultClothing').src = appState.clothingNoBg.toDataURL('image/png');
+            } else {
+                document.getElementById('resultClothing').src = appState.clothingImage;
+            }
+            
+            document.getElementById('resultFitting').src = appState.resultImage;
+            
+            const zoneText = appState.clothingType === 'upper' ? '🔝 ВЕРХНЯЯ часть тела' : '🔽 НИЖНЯЯ часть тела';
+            document.getElementById('detectionInfo').innerHTML = `
+                <i class="fas fa-robot"></i> <strong>Определён тип:</strong> ${appState.clothingTypeName}<br>
+                📍 <strong>Наложение на:</strong> ${zoneText}<br>
+                🎛️ <strong>Настройки:</strong> используйте ползунки для точной подгонки
+            `;
+            
+            syncSliders();
+            showNotification('Готово!', 'Используйте ползунки для точной настройки', 'success');
+        }
+        
+        async function adjustAndRedraw() {
+            if(!appState.personImage || !appState.clothingNoBg || !appState.bodyMeasurements) return;
+            
+            const personImg = await loadImageFromUrl(appState.personImage);
+            const newCanvas = await overlayClothing(
+                personImg, appState.clothingNoBg, appState.bodyMeasurements,
+                appState.clothingType,
+                appState.currentSizePercent,
+                appState.currentHeightPercent,
+                appState.currentOffsetPercent,
+                appState.currentHorizontalPercent,
+                appState.currentRotateDeg
+            );
+            
+            appState.resultImage = newCanvas.toDataURL('image/png');
+            document.getElementById('resultFitting').src = appState.resultImage;
+        }
+        
+        function syncSliders() {
+            sizeSlider.value = appState.currentSizePercent;
+            sizeValue.textContent = appState.currentSizePercent;
+            heightSlider.value = appState.currentHeightPercent;
+            heightValue.textContent = appState.currentHeightPercent;
+            offsetSlider.value = appState.currentOffsetPercent;
+            offsetValue.textContent = appState.currentOffsetPercent;
+            horizontalSlider.value = appState.currentHorizontalPercent;
+            horizontalValue.textContent = appState.currentHorizontalPercent;
+            rotateSlider.value = appState.currentRotateDeg;
+            rotateValue.textContent = appState.currentRotateDeg;
+        }
+        
+        sizeSlider.addEventListener('input', function() {
+            appState.currentSizePercent = parseInt(this.value);
+            syncSliders();
+            if(appState.personImage && appState.clothingNoBg && appState.bodyMeasurements) adjustAndRedraw();
+        });
+        
+        heightSlider.addEventListener('input', function() {
+            appState.currentHeightPercent = parseInt(this.value);
+            syncSliders();
+            if(appState.personImage && appState.clothingNoBg && appState.bodyMeasurements) adjustAndRedraw();
+        });
+        
+        offsetSlider.addEventListener('input', function() {
+            appState.currentOffsetPercent = parseInt(this.value);
+            syncSliders();
+            if(appState.personImage && appState.clothingNoBg && appState.bodyMeasurements) adjustAndRedraw();
+        });
+        
+        horizontalSlider.addEventListener('input', function() {
+            appState.currentHorizontalPercent = parseInt(this.value);
+            syncSliders();
+            if(appState.personImage && appState.clothingNoBg && appState.bodyMeasurements) adjustAndRedraw();
+        });
+        
+        rotateSlider.addEventListener('input', function() {
+            appState.currentRotateDeg = parseInt(this.value);
+            syncSliders();
+            if(appState.personImage && appState.clothingNoBg && appState.bodyMeasurements) adjustAndRedraw();
+        });
+        
+        function downloadResult() {
+            if(!appState.resultImage) {
+                showNotification('Ошибка', 'Нет результата для скачивания', 'error');
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = appState.resultImage;
+            link.download = 'fitting_result.png';
+            link.click();
+            showNotification('Скачано', 'Результат сохранен', 'success');
+        }
+        
+        function newFitting() {
+            appState = {
+                personImage: null,
+                clothingImage: null,
+                clothingNoBg: null,
+                resultImage: null,
+                bodyMeasurements: null,
+                clothingType: 'upper',
+                clothingTypeName: '',
+                currentSizePercent: 115,
+                currentHeightPercent: 100,
+                currentOffsetPercent: 0,
+                currentHorizontalPercent: 0,
+                currentRotateDeg: 0
+            };
+            
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            
+            document.getElementById('personPreview').style.display = 'none';
+            document.getElementById('clothingPreview').style.display = 'none';
+            document.getElementById('personPlaceholder').style.display = 'flex';
+            document.getElementById('clothingPlaceholder').style.display = 'flex';
+            
+            personInput.value = '';
+            clothingInput.value = '';
+            processBtn.disabled = true;
+            document.getElementById('progressFill').style.width = '0%';
+            
+            syncSliders();
+            showNotification('Готово', 'Загрузите новые фото для примерки', 'info');
+        }
+    </script>
+</body>
+</html>
